@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classifica Squadre</title>
+    <style>
+        /* Impostazione dell'immagine di sfondo */
+        body {
+            background-image: url('https://i.pinimg.com/originals/fb/55/b9/fb55b97a08551278e3a9996dd89b9a13.jpg');  /* URL dell'immagine */
+            background-size: cover;  /* Copre l'intera area della pagina */
+            background-position: center;  /* Centra l'immagine */
+            background-attachment: fixed;  /* Rende lo sfondo fisso durante lo scorrimento */
+            font-family: Arial, sans-serif;  /* Font per il testo */
+            color: white;  /* Colore del testo di default */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Impostazioni per il titolo */
+        h1 {
+            text-align: center;
+            color: white;  /* Colore del titolo in bianco */
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);  /* Sfondo traslucido per il titolo */
+            margin: 0;
+        }
+
+        /* Stile per la tabella */
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table, th, td {
+            border: 1px solid white;  /* Bordo bianco per la tabella */
+        }
+
+        th, td {
+            padding: 10px;
+            color: white;  /* Colore del testo nella tabella */
+        }
+
+        th {
+            background-color: #333;  /* Colore di sfondo delle intestazioni */
+        }
+
+        /* Colore per le righe della tabella */
+        tr:nth-child(even) {
+            background-color: #444;  /* Colore alternato per le righe */
+        }
+
+        tr:nth-child(odd) {
+            background-color: #555;  /* Colore alternato per le righe */
+        }
+
+        /* Colore dei link */
+        a {
+            color: #ffffff;
+        }
+
+        /* Stile per le ultime 6 righe con sfondo rosso chiaro */
+        .last-rows {
+            background: linear-gradient(to right, #ff6666, #ff6666);
+        }
+
+        /* Stile per i loghi delle squadre */
+        td img {
+            width: 80px;  /* Aumentato il logo a 80px */
+            height: 80px;  /* Aumentato il logo a 80px */
+        }
+    </style>
+</head>
+<body>
+    <h1>Classifica delle Squadre</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Logo Squadra</th>
+                <th>Nome Squadra</th>
+                <th>Punti</th>
+                <th>Coppe Vinte</th>
+            </tr>
+        </thead>
+        <tbody id="classifica-body">
+            <!-- I dati delle squadre verranno inseriti qui -->
+        </tbody>
+    </table>
+
+    <script>
+        async function loadClassifica() {
+            const apiUrl = 'https://script.googleusercontent.com/macros/echo?user_content_key=-oJzg8CNb1qqlaXiT8Q5TuSNv5e6C2Qpex601pbqJu09jCZ73fmlcKykIuRJ3qsnfZk99SE-S7CWlTaNgwGZfqCpU-nRKM36m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnDhE39eRy1Zx-mWsu29UMj-_yTtgKE2jiL7qn9l5p9EHa58qGJQuE2EpobzWdZq7WHJnmwPq3MA_woGzTZunXqmOL-u6MIwbXw&lib=MFUo4BgCRuV7pvHsuno6gSwS7g1xLMLOv';
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();  // Converte la risposta in formato JSON
+
+                // Filtra le squadre con categoria 'A' e ordina per punti decrescenti, poi per coppe vinte decrescenti
+                const filteredData = data.filter(squadra => squadra.categoria === 'A')
+                                        .sort((a, b) => {
+                                            if (b.punti === a.punti) {
+                                                return b.coppe_vinte - a.coppe_vinte; // Se i punti sono uguali, ordina per coppe vinte
+                                            }
+                                            return b.punti - a.punti; // Ordina per punti in ordine decrescente
+                                        });
+
+                console.log(filteredData);  // Visualizza i dati nella console per il debug
+
+                const tbody = document.getElementById('classifica-body');
+                tbody.innerHTML = ''; // Pulisce la tabella prima di aggiungere i dati
+
+                // Aggiungi le righe alla tabella
+                filteredData.forEach((squadra, index) => {
+                    const row = document.createElement('tr');
+
+                    // Aggiungi la classe 'last-rows' per le ultime 6 righe
+                    if (index >= filteredData.length - 6) {
+                        row.classList.add('last-rows');
+                    }
+
+                    row.innerHTML = `
+                        <td><img src="${squadra.url_immagine || 'default_image_url.jpg'}" alt="Logo" style="width: 80px; height: 80px;"></td>
+                        <td>${squadra.nome_squadra || 'N/A'}</td>
+                        <td>${squadra.punti || 'N/A'}</td>
+                        <td>${squadra.coppe_vinte || 'N/A'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Errore nel caricamento dei dati:', error);
+            }
+        }
+
+        // Carica la classifica quando la pagina è pronta
+        document.addEventListener('DOMContentLoaded', loadClassifica);
+    </script>
+</body>
+</html>
